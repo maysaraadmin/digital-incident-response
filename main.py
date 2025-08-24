@@ -46,6 +46,12 @@ class IncidentResponseTool(QMainWindow):
         # Initialize data
         self.refresh_all_data()
     
+    def refresh_all_data(self):
+        """Initialize or refresh data for all tabs"""
+        # This method is called to initialize or refresh all data in the application
+        # Currently just updating status bar, can be expanded to refresh all tabs
+        self.statusBar().showMessage("Data refreshed")
+    
     def create_playbook_tab(self):
         """Create incident response playbook tab"""
         playbook_tab = QWidget()
@@ -467,20 +473,44 @@ class IncidentResponseTool(QMainWindow):
 
     # ... (all other previous methods remain unchanged)
 
+def is_admin_windows():
+    try:
+        import ctypes
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
 def main():
-    app = QApplication(sys.argv)
-    app.setApplicationName("Digital Incident Response Tool")
-    
-    # Check if running with appropriate permissions
-    if platform.system() == "Windows" and not os.getuid() == 0:
-        print("Warning: For best results, run as Administrator on Windows")
-    elif platform.system() == "Linux" and os.getuid() != 0:
-        print("Warning: For best results, run as root on Linux")
-    
-    window = IncidentResponseTool()
-    window.show()
-    
-    sys.exit(app.exec_())
+    try:
+        print("Starting application...")
+        app = QApplication(sys.argv)
+        print("QApplication created")
+        app.setApplicationName("Digital Incident Response Tool")
+        
+        # Check if running with appropriate permissions
+        if platform.system() == "Windows":
+            if not is_admin_windows():
+                print("Warning: For best results, run as Administrator on Windows")
+        elif platform.system() == "Linux" and os.getuid() != 0:
+            print("Warning: For best results, run as root on Linux")
+        
+        print("Creating main window...")
+        window = IncidentResponseTool()
+        print("Showing window...")
+        window.show()
+        print("Entering application event loop...")
+        sys.exit(app.exec_())
+    except Exception as e:
+        print(f"Error in main: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        input("Press Enter to exit...")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        input("Press Enter to exit...")
